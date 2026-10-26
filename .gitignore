@@ -1,4 +1,29 @@
-# 不公開的原始資料：履歷、客戶簡報、案例匯出、未處理相片
+# Nuxt dev/build outputs
+.output
+.data
+.nuxt
+.nitro
+.cache
+dist
+
+# Node dependencies
+node_modules
+
+# Logs
+logs
+*.log
+
+# Misc
+.DS_Store
+.fleet
+.idea
+
+# Local env files
+.env
+.env.*
+!.env.example
+
+# Private / local assets (do not publish)
 *.pdf
 案例/
 Photo/
