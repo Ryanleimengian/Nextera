@@ -2,10 +2,6 @@
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
   devtools: { enabled: true },
-  // 舊版 Options API 以 template 字串註冊，production 需 runtime compiler
-  vue: {
-    runtimeCompiler: true,
-  },
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/nextera.css'],
   runtimeConfig: {

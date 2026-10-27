@@ -1,7 +1,31 @@
+import * as Vue from 'vue';
 import { reactive, computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
+import { compile } from '@vue/compiler-dom';
 import { ArtPiece, BrowserChrome } from '../utils/artworks.mjs';
 
 const reducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: true };
+
+/** Production 為 runtime-only Vue，需先把 template 字串編譯成 render */
+function compileOptionsComponent(comp, seen = new WeakSet()) {
+  if (!comp || typeof comp !== 'object') return comp;
+  if (seen.has(comp)) return comp;
+  seen.add(comp);
+
+  const out = { ...comp };
+  if (out.components) {
+    const nested = {};
+    for (const [name, child] of Object.entries(out.components)) {
+      nested[name] = compileOptionsComponent(child, seen);
+    }
+    out.components = nested;
+  }
+  if (typeof out.template === 'string' && !out.render) {
+    const { code } = compile(out.template, { mode: 'function', hoistStatic: true });
+    out.render = new Function('Vue', code)(Vue);
+    delete out.template;
+  }
+  return out;
+}
 
 export function metaForRoute(r, C) {
   if (r.name === 'service') {
@@ -1681,11 +1705,11 @@ export function registerNextera(vueApp, { C, store }) {
   };
 
   vueApp.directive('reveal', revealDirective);
-  vueApp.component('art-piece', ArtPiece);
-  vueApp.component('browser-chrome', BrowserChrome);
+  vueApp.component('art-piece', compileOptionsComponent(ArtPiece));
+  vueApp.component('browser-chrome', compileOptionsComponent(BrowserChrome));
 
   Object.entries(pages).forEach(([name, comp]) => {
-    vueApp.component(name, comp);
+    vueApp.component(name, compileOptionsComponent(comp));
   });
 
   return pages;
