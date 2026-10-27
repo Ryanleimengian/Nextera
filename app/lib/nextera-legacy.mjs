@@ -5,17 +5,19 @@ import { ArtPiece, ART_COMPONENTS, BrowserChrome, PhoneFrame, FoodMotif } from '
 
 const reducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: true };
 
-/** Production 為 runtime-only Vue，需先把 template 字串編譯成 render */
-function compileOptionsComponent(comp, seen = new WeakSet()) {
+/** Production 為 runtime-only Vue，需先把 template 字串編譯成 render。
+ *  用 WeakMap 快取：同一元件被多處引用時，一律回傳已編譯版本（避免後者拿到未編譯原稿）。 */
+function compileOptionsComponent(comp, cache = new WeakMap()) {
   if (!comp || typeof comp !== 'object') return comp;
-  if (seen.has(comp)) return comp;
-  seen.add(comp);
+  if (cache.has(comp)) return cache.get(comp);
 
   const out = { ...comp };
+  cache.set(comp, out);
+
   if (out.components) {
     const nested = {};
     for (const [name, child] of Object.entries(out.components)) {
-      nested[name] = compileOptionsComponent(child, seen);
+      nested[name] = compileOptionsComponent(child, cache);
     }
     out.components = nested;
   }
