@@ -1,5 +1,6 @@
 [build]
-  command = "npm run generate"
+  # 清快取再建置，避免舊版 JS 殘留導致概念圖空白
+  command = "npx nuxi cleanup && npm run generate"
   # Nuxt on Netlify uses netlify-static preset → output in dist/
   publish = "dist"
 
