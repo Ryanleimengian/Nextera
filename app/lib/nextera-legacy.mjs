@@ -1202,11 +1202,12 @@ export function registerNextera(vueApp, { C, store }) {
           status: 'idle',
           alert: '',
           submitError: '',
-          endpoint: C.contact.formEndpoint,
+          endpoint: C.contact.formEndpoint || 'https://api.web3forms.com/submit',
+          accessKey: (C.contact.formAccessKey || '').trim(),
         };
       },
       computed: {
-        demo() { return !this.endpoint; },
+        demo() { return !this.accessKey; },
         has() { return { managed: this.form.services.includes('managed'), training: this.form.services.includes('training'), webai: this.form.services.includes('webai') }; },
         fromCase() { return this.preset && this.preset.case ? C.cases.find((c) => c.slug === this.preset.case) : null; },
         selectedLabels() { return this.form.services.map((k) => serviceByKey(k).zh); },
@@ -1262,10 +1263,29 @@ export function registerNextera(vueApp, { C, store }) {
         },
         payload() {
           const f = this.form;
-          const data = { name: f.name.trim(), company: f.company.trim(), email: f.email.trim(), phone: f.phone.trim(), website: f.website.trim(), services: f.services.slice(), message: f.message.trim(), startTime: f.startTime, sourceCase: this.fromCase ? this.fromCase.slug : '' };
-          if (this.has.managed) Object.assign(data, { platforms: f.platforms.slice(), managedIssue: f.managedIssue });
+          const join = (arr) => (arr && arr.length ? arr.join('、') : '');
+          const data = {
+            name: f.name.trim(),
+            company: f.company.trim(),
+            email: f.email.trim(),
+            phone: f.phone.trim(),
+            website: f.website.trim(),
+            services: join(this.selectedLabels),
+            message: f.message.trim(),
+            startTime: f.startTime,
+            sourceCase: this.fromCase ? this.fromCase.slug : '',
+          };
+          if (this.has.managed) Object.assign(data, { platforms: join(f.platforms), managedIssue: f.managedIssue });
           if (this.has.training) Object.assign(data, { trainingSize: f.trainingSize, aiLevel: f.aiLevel, trainingGoal: f.trainingGoal.trim() });
-          if (this.has.webai) Object.assign(data, { projectTypes: f.projectTypes.slice(), currentSystems: f.currentSystems.trim(), integration: f.integration.trim() });
+          if (this.has.webai) Object.assign(data, { projectTypes: join(f.projectTypes), currentSystems: f.currentSystems.trim(), integration: f.integration.trim() });
+          if (!this.demo) {
+            Object.assign(data, {
+              access_key: this.accessKey,
+              subject: 'NextEra 網站查詢｜' + (f.company.trim() || f.name.trim() || '新提交'),
+              from_name: 'NextEra Website',
+              botcheck: false,
+            });
+          }
           return data;
         },
         async submit() {
@@ -1286,8 +1306,13 @@ export function registerNextera(vueApp, { C, store }) {
             this.status = 'demo-success';
           } else {
             try {
-              const res = await fetch(this.endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify(this.payload()) });
-              if (!res.ok) throw new Error('HTTP ' + res.status);
+              const res = await fetch(this.endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+                body: JSON.stringify(this.payload()),
+              });
+              const json = await res.json().catch(() => ({}));
+              if (!res.ok || json.success === false) throw new Error(json.message || ('HTTP ' + res.status));
               this.status = 'success';
             } catch (e) {
               this.status = 'idle';
@@ -1304,13 +1329,12 @@ export function registerNextera(vueApp, { C, store }) {
           this.applyPreset(this.preset);
           nextTick(() => this.focusField('name'));
         },
-        openPrivacy() { window.dispatchEvent(new CustomEvent('open-privacy')); },
         err(f) { return this.errors[f] ? 'e-' + f : null; },
       },
       template: `
         <div class="border border-line bg-white p-6 sm:p-10">
           <div v-if="demo" class="flex gap-3 border-l-2 border-gold bg-sand/70 px-4 py-3 text-[14px] leading-relaxed text-ink" role="note">
-            <p><strong class="font-semibold text-navy">示範模式：</strong>表單尚未接駁正式接收服務，提交內容不會被寄出或儲存。</p>
+            <p><strong class="font-semibold text-navy">示範模式：</strong>尚未設定 Web3Forms access key，提交內容不會被寄出或儲存。</p>
           </div>
   
           <div v-if="status === 'demo-success' || status === 'success'" ref="result" tabindex="-1" class="py-10 text-center outline-none" role="status">
@@ -1482,7 +1506,7 @@ export function registerNextera(vueApp, { C, store }) {
             </fieldset>
   
             <div class="mt-10 flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
-              <p class="text-[13px] leading-relaxed text-ink/70">資料處理方式請參閱 <button type="button" class="font-medium text-navy underline underline-offset-4" @click="openPrivacy">私隱政策</button>。</p>
+              <p class="text-[13px] leading-relaxed text-ink/70">資料處理方式請參閱 <a href="/privacy" class="font-medium text-navy underline underline-offset-4">私隱政策</a>。</p>
               <button type="submit" class="btn btn-primary min-w-[12rem]" :disabled="status === 'submitting'" :aria-busy="status === 'submitting' ? 'true' : 'false'">
                 <template v-if="status === 'submitting'"><span class="spinner" aria-hidden="true"></span>提交中…</template>
                 <template v-else>{{ demo ? '提交需求（示範）' : '提交需求' }}</template>

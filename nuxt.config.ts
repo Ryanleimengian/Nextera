@@ -4,6 +4,20 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/nextera.css'],
+  runtimeConfig: {
+    public: {
+      // 本機：在 .env 設 NUXT_PUBLIC_WEB3FORMS_ACCESS_KEY=你的 key
+      // 或暫時寫在 app/data/content.js 的 contact.formAccessKey
+      web3formsAccessKey: '',
+      siteUrl: 'https://nexterasia.com',
+    },
+  },
+  nitro: {
+    prerender: {
+      crawlLinks: true,
+      routes: ['/', '/about', '/contact', '/media', '/work', '/privacy', '/terms'],
+    },
+  },
   app: {
     head: {
       htmlAttrs: { lang: 'zh-Hant-HK' },
@@ -12,6 +26,7 @@ export default defineNuxtConfig({
         { name: 'theme-color', content: '#FAF9F6' },
         { property: 'og:type', content: 'website' },
         { property: 'og:site_name', content: 'NextEra' },
+        { property: 'og:url', content: 'https://nexterasia.com' },
       ],
       link: [
         { rel: 'icon', type: 'image/png', href: '/assets/brand/nextera-mark.png' },

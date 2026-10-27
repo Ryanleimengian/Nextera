@@ -1,0 +1,7 @@
+[build]
+  command = "npm run generate"
+  # Nuxt on Netlify uses netlify-static preset → output in dist/
+  publish = "dist"
+
+[build.environment]
+  NODE_VERSION = "22"

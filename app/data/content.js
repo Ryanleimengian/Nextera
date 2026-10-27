@@ -12,12 +12,14 @@ export default {
     markets: ['餐飲', '零售', '美容', '教育', '專業服務', '成長中的品牌'],
   },
 
-  /* 填入真實資料後才會顯示；formEndpoint 留空即為示範模式 */
+  /* 填入真實資料後才會顯示；formAccessKey 留空即為示範模式 */
   contact: {
     email: '',
     whatsapp: '', // 只填數字，包括地區碼，例如 853xxxxxxxx
     bookingUrl: '',
-    formEndpoint: '', // 接收 JSON POST 的網址，回應 2xx 才會顯示提交成功
+    /* Web3Forms：https://web3forms.com/ 用電郵申請後會寄 access key */
+    formEndpoint: 'https://api.web3forms.com/submit',
+    formAccessKey: '', // 可填 key；正式環境建議改用 .env 的 NUXT_PUBLIC_WEB3FORMS_ACCESS_KEY
     social: { facebook: '', instagram: '' },
   },
 

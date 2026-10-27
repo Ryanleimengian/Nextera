@@ -27,3 +27,6 @@ logs
 *.pdf
 案例/
 Photo/
+
+# Local Netlify folder
+.netlify
