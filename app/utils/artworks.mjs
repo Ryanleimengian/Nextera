@@ -759,4 +759,4 @@
       </div>`,
   };
 
-export { ArtPiece, ART_LABELS, PhoneFrame, BrowserChrome, FoodMotif };
+export { ArtPiece, ART_COMPONENTS, ART_LABELS, PhoneFrame, BrowserChrome, FoodMotif };

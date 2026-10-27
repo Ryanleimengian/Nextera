@@ -1,7 +1,7 @@
 import * as Vue from 'vue';
 import { reactive, computed, ref, watch, nextTick, onMounted, onBeforeUnmount } from 'vue';
 import { compile } from '@vue/compiler-dom';
-import { ArtPiece, BrowserChrome } from '../utils/artworks.mjs';
+import { ArtPiece, ART_COMPONENTS, BrowserChrome, PhoneFrame, FoodMotif } from '../utils/artworks.mjs';
 
 const reducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: true };
 
@@ -1705,8 +1705,15 @@ export function registerNextera(vueApp, { C, store }) {
   };
 
   vueApp.directive('reveal', revealDirective);
+
+  // ArtPiece 以 :is 動態載入 ART_COMPONENTS，需逐一編譯
+  Object.keys(ART_COMPONENTS).forEach((key) => {
+    ART_COMPONENTS[key] = compileOptionsComponent(ART_COMPONENTS[key]);
+  });
   vueApp.component('art-piece', compileOptionsComponent(ArtPiece));
   vueApp.component('browser-chrome', compileOptionsComponent(BrowserChrome));
+  vueApp.component('phone-frame', compileOptionsComponent(PhoneFrame));
+  vueApp.component('food-motif', compileOptionsComponent(FoodMotif));
 
   Object.entries(pages).forEach(([name, comp]) => {
     vueApp.component(name, compileOptionsComponent(comp));
