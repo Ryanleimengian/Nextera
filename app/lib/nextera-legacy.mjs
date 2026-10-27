@@ -880,7 +880,7 @@ export function registerNextera(vueApp, { C, store }) {
               <div class="bg-paper p-6"><dt class="meta-label">服務範圍</dt><dd class="mt-2 text-[15px] leading-relaxed text-navy">{{ c.scope.join('、') }}</dd></div>
               <div class="bg-paper p-6"><dt class="meta-label">{{ c.internal ? '運營時期' : '合作時期' }}</dt><dd class="mt-2 text-[15px] text-navy">{{ c.period }}</dd></div>
               <div class="bg-paper p-6"><dt class="meta-label">{{ c.internal ? '相關服務' : '對應服務' }}</dt><dd class="mt-2 text-[15px]"><a :href="'/services/' + service.slug" class="text-navy underline decoration-gold underline-offset-4 hover:decoration-navy">{{ service.short || service.zh }}</a></dd></div>
-              <div v-if="c.link" class="bg-paper p-6"><dt class="meta-label">平台</dt><dd class="mt-2 text-[15px]"><a :href="c.link" target="_blank" rel="noopener" class="text-navy underline decoration-gold underline-offset-4 hover:decoration-navy">{{ c.platform }} 帳號<span class="sr-only">（在新分頁開啟）</span></a></dd></div>
+              <div v-if="c.link" class="bg-paper p-6"><dt class="meta-label">平台</dt><dd class="mt-2 text-[15px]"><a :href="c.link" target="_blank" rel="noopener noreferrer" class="text-navy underline decoration-gold underline-offset-4 hover:decoration-navy">{{ c.platform }} 帳號<span class="sr-only">（在新分頁開啟）</span></a></dd></div>
             </dl>
             <p v-if="c.capability" class="mt-6 border-l-2 border-gold bg-sand/60 p-5 text-[15px] leading-[1.85] text-ink/85" role="note">{{ c.capability }}</p>
             <p v-if="c.internalNote" class="mt-6 border-l-2 border-gold bg-sand/60 p-5 text-[15px] leading-[1.85] text-ink/85" role="note">{{ c.internalNote }}</p>
@@ -1223,12 +1223,12 @@ export function registerNextera(vueApp, { C, store }) {
           status: 'idle',
           alert: '',
           submitError: '',
-          endpoint: C.contact.formEndpoint || 'https://api.web3forms.com/submit',
-          accessKey: (C.contact.formAccessKey || '').trim(),
+          endpoint: (C.contact.formEndpoint || '').trim(),
         };
       },
       computed: {
-        demo() { return !this.accessKey; },
+        /* 本機 nuxt dev 走示範；正式／netlify 走 Function */
+        demo() { return import.meta.dev || !this.endpoint; },
         has() { return { managed: this.form.services.includes('managed'), training: this.form.services.includes('training'), webai: this.form.services.includes('webai') }; },
         fromCase() { return this.preset && this.preset.case ? C.cases.find((c) => c.slug === this.preset.case) : null; },
         selectedLabels() { return this.form.services.map((k) => serviceByKey(k).zh); },
@@ -1239,7 +1239,7 @@ export function registerNextera(vueApp, { C, store }) {
       },
       methods: {
         blank() {
-          return { name: '', company: '', email: '', phone: '', website: '', services: [], platforms: [], managedIssue: '', trainingSize: '', aiLevel: '', trainingGoal: '', projectTypes: [], currentSystems: '', integration: '', message: '', startTime: '' };
+          return { name: '', company: '', email: '', phone: '', website: '', services: [], platforms: [], managedIssue: '', trainingSize: '', aiLevel: '', trainingGoal: '', projectTypes: [], currentSystems: '', integration: '', message: '', startTime: '', hp_company: '' };
         },
         applyPreset(p) {
           if (!p) return;
@@ -1301,10 +1301,9 @@ export function registerNextera(vueApp, { C, store }) {
           if (this.has.webai) Object.assign(data, { projectTypes: join(f.projectTypes), currentSystems: f.currentSystems.trim(), integration: f.integration.trim() });
           if (!this.demo) {
             Object.assign(data, {
-              access_key: this.accessKey,
               subject: 'NextEra 網站查詢｜' + (f.company.trim() || f.name.trim() || '新提交'),
-              from_name: 'NextEra Website',
-              botcheck: false,
+              hp_company: f.hp_company,
+              botcheck: !!f.hp_company,
             });
           }
           return data;
@@ -1322,6 +1321,14 @@ export function registerNextera(vueApp, { C, store }) {
           }
           this.alert = '';
           this.status = 'submitting';
+          /* 蜜罐被填：假裝成功，不送出 */
+          if (this.form.hp_company) {
+            await new Promise((r) => setTimeout(r, 600));
+            this.status = 'success';
+            await nextTick();
+            if (this.$refs.result) this.$refs.result.focus();
+            return;
+          }
           if (this.demo) {
             await new Promise((r) => setTimeout(r, 1000));
             this.status = 'demo-success';
@@ -1355,7 +1362,7 @@ export function registerNextera(vueApp, { C, store }) {
       template: `
         <div class="border border-line bg-white p-6 sm:p-10">
           <div v-if="demo" class="flex gap-3 border-l-2 border-gold bg-sand/70 px-4 py-3 text-[14px] leading-relaxed text-ink" role="note">
-            <p><strong class="font-semibold text-navy">示範模式：</strong>尚未設定 Web3Forms access key，提交內容不會被寄出或儲存。</p>
+            <p><strong class="font-semibold text-navy">示範模式：</strong>本機開發環境不會呼叫正式表單服務，提交內容不會被寄出或儲存。</p>
           </div>
   
           <div v-if="status === 'demo-success' || status === 'success'" ref="result" tabindex="-1" class="py-10 text-center outline-none" role="status">
@@ -1524,6 +1531,12 @@ export function registerNextera(vueApp, { C, store }) {
                   <option v-for="o in opts.startTime" :key="o" :value="o">{{ o }}</option>
                 </select>
               </div>
+
+              <!-- 蜜罐：對真人隱藏，機器人常會填寫 -->
+              <div class="hp-field" aria-hidden="true">
+                <label for="f-hp">公司網站</label>
+                <input id="f-hp" v-model="form.hp_company" type="text" name="hp_company" tabindex="-1" autocomplete="off" />
+              </div>
             </fieldset>
   
             <div class="mt-10 flex flex-col-reverse gap-4 border-t border-line pt-6 sm:flex-row sm:items-center sm:justify-between">
@@ -1551,8 +1564,8 @@ export function registerNextera(vueApp, { C, store }) {
               <p class="rise mt-3 font-mono text-[13px] tracking-[0.14em] text-gold-700" style="animation-delay:140ms">{{ m.tagline.toUpperCase() }}</p>
               <p class="rise lead mt-6 max-w-2xl" style="animation-delay:200ms">{{ m.bio }}</p>
               <div class="rise mt-8 flex flex-wrap gap-4" style="animation-delay:260ms">
-                <a :href="m.instagram" target="_blank" rel="noopener" class="btn btn-primary">Instagram @{{ m.handle }}<arrow-icon /></a>
-                <a :href="m.youtubeUrl" target="_blank" rel="noopener" class="btn btn-ghost">YouTube {{ m.channel }}<arrow-icon /></a>
+                <a :href="m.instagram" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Instagram @{{ m.handle }}<arrow-icon /></a>
+                <a :href="m.youtubeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">YouTube {{ m.channel }}<arrow-icon /></a>
               </div>
             </div>
           </section>
@@ -1587,7 +1600,7 @@ export function registerNextera(vueApp, { C, store }) {
             <div class="container">
               <div class="flex flex-wrap items-end justify-between gap-6">
                 <div><eyebrow text="PODCAST・商業對談" /><h2 id="media-episodes" class="h2 mt-6">Podcast 內容</h2></div>
-                <a :href="m.instagram" target="_blank" rel="noopener" class="link-arrow text-navy">到 Instagram 收看<arrow-icon /></a>
+                <a :href="m.instagram" target="_blank" rel="noopener noreferrer" class="link-arrow text-navy">到 Instagram 收看<arrow-icon /></a>
               </div>
               <div class="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 lg:max-w-3xl">
                 <figure v-for="e in m.episodes" :key="e.src">
@@ -1608,11 +1621,11 @@ export function registerNextera(vueApp, { C, store }) {
                 <eyebrow text="VIDEO・影片" />
                 <h2 id="media-video" class="h2 mt-6">影片製作</h2>
                 <p class="mt-5 text-[15px] leading-[1.85] text-ink/85">Podcast 對談同步製作為長片，於 YouTube 頻道發布。</p>
-                <a :href="m.youtubeUrl" target="_blank" rel="noopener" class="link-arrow mt-6 text-navy">到 YouTube 頻道收看<arrow-icon /></a>
+                <a :href="m.youtubeUrl" target="_blank" rel="noopener noreferrer" class="link-arrow mt-6 text-navy">到 YouTube 頻道收看<arrow-icon /></a>
               </div>
               <div class="lg:col-span-7">
                 <div class="grid gap-6">
-                  <a v-for="v in m.videos" :key="v.id" :href="'https://youtu.be/' + v.id" target="_blank" rel="noopener" class="group grid items-center gap-4 sm:grid-cols-[220px_1fr]">
+                  <a v-for="v in m.videos" :key="v.id" :href="'https://youtu.be/' + v.id" target="_blank" rel="noopener noreferrer" class="group grid items-center gap-4 sm:grid-cols-[220px_1fr]">
                     <img :src="v.src" :alt="'YouTube 影片封面：' + v.title" :width="v.w" :height="v.h" decoding="async" class="h-auto w-full rounded-md border border-line transition group-hover:opacity-90" />
                     <span>
                       <span class="block text-[15px] font-semibold leading-snug text-navy">{{ v.title }}</span>
@@ -1668,7 +1681,7 @@ export function registerNextera(vueApp, { C, store }) {
                 <div v-if="channels.length" class="mt-10">
                   <p class="text-[12px] font-semibold tracking-[0.18em] text-gold-700">其他聯絡方式</p>
                   <ul class="mt-3 space-y-2">
-                    <li v-for="c in channels" :key="c.label"><a :href="c.href" :target="c.ext ? '_blank' : null" :rel="c.ext ? 'noopener' : null" class="link-arrow text-navy">{{ c.label }}：{{ c.value }}</a></li>
+                    <li v-for="c in channels" :key="c.label"><a :href="c.href" :target="c.ext ? '_blank' : null" :rel="c.ext ? 'noopener noreferrer' : null" class="link-arrow text-navy">{{ c.label }}：{{ c.value }}</a></li>
                   </ul>
                 </div>
               </div>

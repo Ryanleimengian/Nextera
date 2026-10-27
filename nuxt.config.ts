@@ -1,15 +1,15 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   compatibilityDate: '2025-07-15',
-  devtools: { enabled: true },
+  // 正式環境關閉 Devtools
+  devtools: { enabled: false },
   modules: ['@nuxtjs/tailwindcss'],
   css: ['~/assets/css/nextera.css'],
   runtimeConfig: {
     public: {
-      // 本機：在 .env 設 NUXT_PUBLIC_WEB3FORMS_ACCESS_KEY=你的 key
-      // 或暫時寫在 app/data/content.js 的 contact.formAccessKey
-      web3formsAccessKey: '',
       siteUrl: 'https://nexterasia.com',
+      // 表單送往 Netlify Function（key 只在伺服器 WEB3FORMS_ACCESS_KEY）
+      formEndpoint: '/.netlify/functions/contact',
     },
   },
   nitro: {

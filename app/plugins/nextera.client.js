@@ -5,8 +5,8 @@ import { mapLegacyRoute } from '~/composables/mapLegacyRoute';
 export default defineNuxtPlugin((nuxtApp) => {
   const store = useSiteStore();
   const runtimeConfig = useRuntimeConfig();
-  const accessKey = (runtimeConfig.public.web3formsAccessKey || content.contact.formAccessKey || '').trim();
-  if (accessKey) content.contact.formAccessKey = accessKey;
+  const endpoint = (runtimeConfig.public.formEndpoint || content.contact.formEndpoint || '').trim();
+  if (endpoint) content.contact.formEndpoint = endpoint;
 
   registerNextera(nuxtApp.vueApp, { C: content, store });
   nuxtApp.vueApp.config.globalProperties.$store = store;

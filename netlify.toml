@@ -1,8 +1,25 @@
 [build]
-  # 清快取再建置，避免舊版 JS 殘留導致概念圖空白
+  # 清快取再建置，避免舊版 JS 殘留
   command = "npx nuxi cleanup && npm run generate"
-  # Nuxt on Netlify uses netlify-static preset → output in dist/
-  publish = "dist"
+  # nuxt generate 輸出目錄
+  publish = ".output/public"
+  functions = "netlify/functions"
 
 [build.environment]
   NODE_VERSION = "22"
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Strict-Transport-Security = "max-age=31536000; includeSubDomains; preload"
+    # unsafe-eval：舊版 Options API 於客戶端編譯 template 仍需要；日後改 SFC 後可移除
+    Content-Security-Policy = "default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; img-src 'self' data: https:; font-src 'self' https://fonts.gstatic.com data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; script-src 'self' 'unsafe-eval'; connect-src 'self'"
+
+[[headers]]
+  for = "/.netlify/functions/*"
+  [headers.values]
+    X-Content-Type-Options = "nosniff"

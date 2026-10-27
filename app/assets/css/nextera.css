@@ -61,6 +61,18 @@
       .legal-prose a { @apply text-navy underline underline-offset-4 hover:text-gold-700; }
       .legal-prose strong { @apply font-semibold text-navy; }
 
+      /* 表單蜜罐：視覺與輔助科技皆隱藏 */
+      .hp-field {
+        position: absolute !important;
+        left: -10000px !important;
+        top: auto !important;
+        width: 1px !important;
+        height: 1px !important;
+        overflow: hidden !important;
+        opacity: 0 !important;
+        pointer-events: none !important;
+      }
+
       .badge-concept { @apply inline-flex items-center gap-1.5 border border-gold-700/50 px-2 py-0.5 text-[11px] font-semibold tracking-[0.08em] text-gold-700; }
       .badge-concept::before { content: ''; @apply h-1.5 w-1.5 rotate-45 bg-current; }
       .meta-label { @apply text-[12px] font-semibold tracking-[0.16em] text-gold-700; }

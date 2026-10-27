@@ -38,9 +38,9 @@ const year = new Date().getFullYear();
           <ul class="mt-4 space-y-3 text-[15px]">
             <li><NuxtLink to="/contact" class="footer-link">提交需求查詢</NuxtLink></li>
             <li v-if="contact.email"><a :href="'mailto:' + contact.email" class="footer-link">{{ contact.email }}</a></li>
-            <li v-if="contact.whatsapp"><a :href="'https://wa.me/' + contact.whatsapp" class="footer-link" target="_blank" rel="noopener">WhatsApp</a></li>
-            <li v-if="contact.social.facebook"><a :href="contact.social.facebook" class="footer-link" target="_blank" rel="noopener">Facebook</a></li>
-            <li v-if="contact.social.instagram"><a :href="contact.social.instagram" class="footer-link" target="_blank" rel="noopener">Instagram</a></li>
+            <li v-if="contact.whatsapp"><a :href="'https://wa.me/' + contact.whatsapp" class="footer-link" target="_blank" rel="noopener noreferrer">WhatsApp</a></li>
+            <li v-if="contact.social.facebook"><a :href="contact.social.facebook" class="footer-link" target="_blank" rel="noopener noreferrer">Facebook</a></li>
+            <li v-if="contact.social.instagram"><a :href="contact.social.instagram" class="footer-link" target="_blank" rel="noopener noreferrer">Instagram</a></li>
           </ul>
         </div>
       </div>
