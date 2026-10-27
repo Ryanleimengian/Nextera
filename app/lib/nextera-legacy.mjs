@@ -5,28 +5,23 @@ import { ArtPiece, ART_COMPONENTS, BrowserChrome, PhoneFrame, FoodMotif } from '
 
 const reducedMotion = typeof window !== 'undefined' ? window.matchMedia('(prefers-reduced-motion: reduce)') : { matches: true };
 
-/** Production 為 runtime-only Vue，需先把 template 字串編譯成 render。
- *  用 WeakMap 快取：同一元件被多處引用時，一律回傳已編譯版本（避免後者拿到未編譯原稿）。 */
-function compileOptionsComponent(comp, cache = new WeakMap()) {
+/** Production 為 runtime-only Vue：就地編譯 template → render，讓所有引用共用同一物件。 */
+function compileOptionsComponent(comp, seen = new WeakSet()) {
   if (!comp || typeof comp !== 'object') return comp;
-  if (cache.has(comp)) return cache.get(comp);
+  if (seen.has(comp)) return comp;
+  seen.add(comp);
 
-  const out = { ...comp };
-  cache.set(comp, out);
-
-  if (out.components) {
-    const nested = {};
-    for (const [name, child] of Object.entries(out.components)) {
-      nested[name] = compileOptionsComponent(child, cache);
+  if (comp.components) {
+    for (const name of Object.keys(comp.components)) {
+      comp.components[name] = compileOptionsComponent(comp.components[name], seen);
     }
-    out.components = nested;
   }
-  if (typeof out.template === 'string' && !out.render) {
-    const { code } = compile(out.template, { mode: 'function', hoistStatic: true });
-    out.render = new Function('Vue', code)(Vue);
-    delete out.template;
+  if (typeof comp.template === 'string' && !comp.render) {
+    const { code } = compile(comp.template, { mode: 'function', hoistStatic: true });
+    comp.render = new Function('Vue', code)(Vue);
+    delete comp.template;
   }
-  return out;
+  return comp;
 }
 
 export function metaForRoute(r, C) {
@@ -1708,17 +1703,21 @@ export function registerNextera(vueApp, { C, store }) {
 
   vueApp.directive('reveal', revealDirective);
 
-  // ArtPiece 以 :is 動態載入 ART_COMPONENTS，需逐一編譯
-  Object.keys(ART_COMPONENTS).forEach((key) => {
-    ART_COMPONENTS[key] = compileOptionsComponent(ART_COMPONENTS[key]);
-  });
-  vueApp.component('art-piece', compileOptionsComponent(ArtPiece));
-  vueApp.component('browser-chrome', compileOptionsComponent(BrowserChrome));
-  vueApp.component('phone-frame', compileOptionsComponent(PhoneFrame));
-  vueApp.component('food-motif', compileOptionsComponent(FoodMotif));
+  // 先編譯所有畫作／共用子元件，再編譯頁面（就地修改，避免巢狀引用拿到未編譯原稿）
+  const sharedSeen = new WeakSet();
+  Object.values(ART_COMPONENTS).forEach((c) => compileOptionsComponent(c, sharedSeen));
+  compileOptionsComponent(FoodMotif, sharedSeen);
+  compileOptionsComponent(PhoneFrame, sharedSeen);
+  compileOptionsComponent(BrowserChrome, sharedSeen);
+  compileOptionsComponent(ArtPiece, sharedSeen);
+
+  vueApp.component('art-piece', ArtPiece);
+  vueApp.component('browser-chrome', BrowserChrome);
+  vueApp.component('phone-frame', PhoneFrame);
+  vueApp.component('food-motif', FoodMotif);
 
   Object.entries(pages).forEach(([name, comp]) => {
-    vueApp.component(name, compileOptionsComponent(comp));
+    vueApp.component(name, compileOptionsComponent(comp, sharedSeen));
   });
 
   return pages;
