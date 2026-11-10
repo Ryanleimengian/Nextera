@@ -13,7 +13,8 @@ const year = new Date().getFullYear();
       <div class="grid gap-12 lg:grid-cols-12">
         <div class="lg:col-span-4">
           <BrandLogo size="md" />
-          <p class="mt-6 max-w-sm text-[15px] leading-[1.85] text-ink/80">NextEra 結合營銷策略、創意內容、企業培訓及 AI 技術，協助澳門及香港中小企業完成日常營銷、提升團隊 AI 能力，並建立配合業務的網站及專屬工具。</p>
+          <p class="mt-5 font-mono text-[12px] tracking-[0.14em] text-gold-700">{{ siteContent.site.tagline }}</p>
+          <p class="mt-4 max-w-sm text-[15px] leading-[1.85] text-ink/80">以 AI 重塑品牌與營銷增長，協助企業與創作者把專業和創意轉化為內容、信任與商業成果。</p>
         </div>
         <nav class="lg:col-span-3" aria-label="服務">
           <p class="footer-title">服務</p>

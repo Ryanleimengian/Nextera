@@ -408,6 +408,7 @@ export function registerNextera(vueApp, { C, store }) {
         process() { return C.home.process; },
         faqs() { return C.home.faqs; },
         markets() { return C.site.markets; },
+        site() { return C.site; },
       },
       methods: { serviceHref, contactHref },
       template: `
@@ -421,12 +422,12 @@ export function registerNextera(vueApp, { C, store }) {
             </svg>
             <div class="container relative grid items-center gap-14 lg:grid-cols-12 lg:gap-12">
               <div class="lg:col-span-6">
-                <p class="rise eyebrow text-gold-700" style="animation-delay:60ms"><span class="eyebrow-line" aria-hidden="true"></span><span class="eyebrow-node" aria-hidden="true"></span>AI-DRIVEN MARKETING CONSULTANCY<span class="caret" aria-hidden="true"></span></p>
+                <p class="rise eyebrow text-gold-700" style="animation-delay:60ms"><span class="eyebrow-line" aria-hidden="true"></span><span class="eyebrow-node" aria-hidden="true"></span>{{ site.tagline.toUpperCase() }}<span class="caret" aria-hidden="true"></span></p>
                 <h1 id="page-title" tabindex="-1" class="mt-7 font-serif-tc text-[clamp(1.9rem,3.9vw,3.5rem)] font-bold leading-[1.3] tracking-[0.01em] text-navy outline-none">
-                  <span class="rise block lg:whitespace-nowrap" style="animation-delay:140ms">為品牌創造影響力，</span>
-                  <span class="rise block lg:whitespace-nowrap" style="animation-delay:240ms">為企業開啟<span class="text-gold-600">下一階段</span>。</span>
+                  <span class="rise block lg:whitespace-nowrap" style="animation-delay:140ms">把影響力，</span>
+                  <span class="rise block lg:whitespace-nowrap" style="animation-delay:240ms">轉化為<span class="text-gold-600">持續增長</span>。</span>
                 </h1>
-                <p class="rise mt-7 max-w-[34rem] text-[17px] leading-[1.9] text-ink/85" style="animation-delay:340ms">從品牌代營運、企業 AI 培訓，到網頁與專屬 AI 開發，NextEra 將策略、創意與技術轉化為可執行的方案。</p>
+                <p class="rise mt-7 max-w-[34rem] text-[17px] leading-[1.9] text-ink/85" style="animation-delay:340ms">以 AI 重塑品牌與營銷：從代營運、企業培訓到網頁與專屬工具，協助企業與創作者把專業與創意變成內容、信任與商業成果。</p>
                 <div class="rise mt-10 flex flex-col gap-3 sm:flex-row" style="animation-delay:440ms">
                   <a href="/contact" class="btn btn-primary">預約需求諮詢<arrow-icon /></a>
                   <a href="/?section=services" class="btn btn-outline">探索服務</a>
@@ -1020,6 +1021,7 @@ export function registerNextera(vueApp, { C, store }) {
       computed: {
         services() { return C.services; },
         markets() { return C.site.markets; },
+        site() { return C.site; },
         team() { return C.team; },
         realCases() { return C.cases.filter((c) => !c.concept); },
       },
@@ -1045,7 +1047,8 @@ export function registerNextera(vueApp, { C, store }) {
               <div class="lg:col-span-7">
                 <p class="rise eyebrow text-gold-700"><span class="eyebrow-line" aria-hidden="true"></span><span class="eyebrow-node" aria-hidden="true"></span>ABOUT NEXTERA</p>
                 <h1 id="page-title" tabindex="-1" class="rise mt-6 font-serif-tc text-[clamp(2.3rem,5vw,4.2rem)] font-bold leading-[1.25] text-navy outline-none" style="animation-delay:80ms">關於 NextEra</h1>
-                <p class="rise lead mt-7 max-w-2xl" style="animation-delay:160ms">NextEra 是一間 AI-driven Marketing Consultancy，結合營銷策略、創意內容、企業培訓及 AI 技術，協助企業完成日常營銷執行、提升團隊 AI 應用能力，並建立配合業務需要的網站及專屬工具。</p>
+                <p class="rise mt-4 font-mono text-[13px] tracking-[0.14em] text-gold-700" style="animation-delay:120ms">{{ site.tagline }}</p>
+                <p class="rise lead mt-7 max-w-2xl" style="animation-delay:160ms">AI-driven Marketing Consultancy——以策略、創意與 AI，協助企業、創業者與創作者把影響力轉化為持續增長。</p>
               </div>
               <div class="rise flex justify-center lg:col-span-5 lg:justify-end" style="animation-delay:200ms">
                 <div class="relative px-10 py-12">
@@ -1056,14 +1059,18 @@ export function registerNextera(vueApp, { C, store }) {
             </div>
           </section>
   
-          <section class="bg-sand py-20 lg:py-28" aria-labelledby="belief-title">
-            <div class="container grid gap-10 lg:grid-cols-12">
-              <div class="lg:col-span-4"><eyebrow text="OUR BELIEF・品牌理念" /></div>
-              <h2 id="belief-title" class="font-serif-tc text-[clamp(1.9rem,4.2vw,3.4rem)] font-bold leading-[1.45] text-navy lg:col-span-8" v-reveal>
-                <span class="block">以<span class="text-gold-600">策略</span>定義方向，</span>
-                <span class="block">以<span class="text-gold-600">創意</span>建立影響力，</span>
-                <span class="block">以 <span class="text-gold-600">AI</span> 提升執行效率。</span>
-              </h2>
+          <section class="bg-sand py-20 lg:py-28" aria-labelledby="vision-title">
+            <div class="container grid gap-12 lg:grid-cols-12 lg:gap-16">
+              <div class="lg:col-span-5" v-reveal>
+                <eyebrow text="VISION・願景" />
+                <h2 id="vision-title" class="mt-6 font-serif-tc text-[clamp(1.7rem,3.2vw,2.4rem)] font-bold leading-[1.4] text-navy">影響力，不該只屬於少數人。</h2>
+                <p class="mt-6 text-[16px] leading-[1.9] text-ink/85">{{ site.vision }}</p>
+              </div>
+              <div class="lg:col-span-7 border-t border-line pt-10 lg:border-l lg:border-t-0 lg:pl-16 lg:pt-0" v-reveal="1">
+                <eyebrow text="MISSION・使命" />
+                <h2 class="mt-6 font-serif-tc text-[clamp(1.7rem,3.2vw,2.4rem)] font-bold leading-[1.4] text-navy">以 AI 重塑增長方式。</h2>
+                <p class="mt-6 text-[16px] leading-[1.9] text-ink/85">{{ site.mission }}</p>
+              </div>
             </div>
           </section>
   
@@ -1567,6 +1574,7 @@ export function registerNextera(vueApp, { C, store }) {
                 <a :href="m.instagram" target="_blank" rel="noopener noreferrer" class="btn btn-primary">Instagram @{{ m.handle }}<arrow-icon /></a>
                 <a :href="m.youtubeUrl" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">YouTube {{ m.channel }}<arrow-icon /></a>
               </div>
+              <p class="rise mt-4 text-[13px] text-ink/65" style="animation-delay:300ms">Instagram {{ m.followers }} 追蹤者 · YouTube {{ m.youtubeSubscribers }} 訂閱</p>
             </div>
           </section>
   
@@ -1602,7 +1610,7 @@ export function registerNextera(vueApp, { C, store }) {
                 <div><eyebrow text="PODCAST・商業對談" /><h2 id="media-episodes" class="h2 mt-6">Podcast 內容</h2></div>
                 <a :href="m.instagram" target="_blank" rel="noopener noreferrer" class="link-arrow text-navy">到 Instagram 收看<arrow-icon /></a>
               </div>
-              <div class="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 lg:max-w-3xl">
+              <div class="mt-12 grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-5">
                 <figure v-for="e in m.episodes" :key="e.src">
                   <img :src="e.src" :alt="e.no + '「' + e.title + '」封面'" width="466" height="621" loading="lazy" decoding="async" class="aspect-[3/4] w-full object-cover" />
                   <figcaption class="mt-3">
