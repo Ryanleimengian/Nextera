@@ -1,8 +1,8 @@
 [build]
   # 清快取再建置，避免舊版 JS 殘留
   command = "npx nuxi cleanup && npm run generate"
-  # nuxt generate 輸出目錄
-  publish = ".output/public"
+  # Netlify 環境下 Nuxt 使用 netlify-static preset，輸出至 dist/
+  publish = "dist"
   functions = "netlify/functions"
 
 [build.environment]
